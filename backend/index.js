@@ -1,17 +1,18 @@
 const express = require('express')
 const app = express()
+const cors = require('cors');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
-console.log(process.env.DB_USER)
 
-//parammistry03
-//9wMBHQMZ23InufAM
-//49.36.67.179
+//middleware
+app.use(cors());
+app.use(express.json());
+
 
 //mongodb connection
 
 const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@yoga-master.nnddyxp.mongodb.net/?retryWrites=true&w=majority&appName=yoga-master`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@yoga-master.xqwp9oz.mongodb.net/?retryWrites=true&w=majority&appName=yoga-master`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -27,20 +28,22 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    //create a databse and collections
-    const database = client.db("insertDB");
-    const usersCollections = database.collection("users");
-    const classesCollection = databse.collection("classes");
+    //create a database and collection
+    const database = client.db("yoga-master"); 
+    const usersCollection = database.collection("users");
+    const classesCollection = database.collection("classes");
     const cartCollection = database.collection("cart");
-    const paymentCollection = database.collection("payment");
+    const paymentCollection = database.collection("payments");
     const enrolledCollection = database.collection("enrolled");
     const appliedCollection = database.collection("applied");
 
     //classes routes here
-    app.post('/new-class', (req,res) => {
-      
+    app.post('/new-class', async(req,res) => {
+      const newClass = req.body;
+      // newClass.availableSeats = parseInt(newClass.availableSeats);
+      const result =  await classesCollection.insertOne(newClass);
+      res.send(result);
     })
-
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
@@ -51,7 +54,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
 
 app.get('/', (req, res) => {
   res.send('Hello Developers 2024!')
